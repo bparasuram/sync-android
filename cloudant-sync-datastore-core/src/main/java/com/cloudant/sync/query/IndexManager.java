@@ -41,6 +41,7 @@ import com.cloudant.sync.datastore.DatastoreImpl;
 import com.cloudant.sync.datastore.encryption.KeyProvider;
 import com.cloudant.sync.datastore.migrations.SchemaOnlyMigration;
 import com.cloudant.sync.sqlite.Cursor;
+import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.sqlite.SQLDatabaseFactory;
 import com.cloudant.sync.sqlite.SQLDatabaseQueue;
@@ -139,7 +140,7 @@ public class IndexManager {
      */
     public Map<String, Object> listIndexes() {
         try {
-            return dbQueue.submit(new SQLQueueCallable<Map<String, Object> >() {
+            return dbQueue.submit(new SQLCallable<Map<String, Object> >() {
                 @Override
                 public Map<String, Object> call(SQLDatabase database) throws Exception {
                      return IndexManager.listIndexesInDatabase(database);
@@ -273,7 +274,7 @@ public class IndexManager {
             return false;
         }
 
-        Future<Boolean> result = dbQueue.submit(new SQLQueueCallable<Boolean>() {
+        Future<Boolean> result = dbQueue.submit(new SQLCallable<Boolean>() {
             @Override
             public Boolean call(SQLDatabase database) {
                 Boolean transactionSuccess = true;
@@ -367,7 +368,7 @@ public class IndexManager {
      */
     protected static boolean ftsAvailable(SQLDatabaseQueue q) {
         boolean ftsAvailable = false;
-        Future<Boolean> result = q.submitTransaction(new SQLQueueCallable<Boolean>() {
+        Future<Boolean> result = q.submitTransaction(new SQLCallable<Boolean>() {
             @Override
             public Boolean call(SQLDatabase db) {
                 Boolean transactionSuccess = true;

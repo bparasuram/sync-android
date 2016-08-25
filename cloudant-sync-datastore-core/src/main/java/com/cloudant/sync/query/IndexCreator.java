@@ -14,6 +14,7 @@ package com.cloudant.sync.query;
 
 import com.cloudant.android.ContentValues;
 import com.cloudant.sync.datastore.Datastore;
+import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.sqlite.SQLDatabaseQueue;
 import com.cloudant.sync.sqlite.SQLQueueCallable;
@@ -165,7 +166,7 @@ class IndexCreator {
         }
 
         final Index index = proposedIndex;
-        Future<Boolean> result = queue.submit(new SQLQueueCallable<Boolean>() {
+        Future<Boolean> result = queue.submit(new SQLCallable<Boolean>() {
             @Override
             public Boolean call(SQLDatabase database) {
                 Boolean transactionSuccess = true;
@@ -326,7 +327,7 @@ class IndexCreator {
 
     private Map<String, Object> listIndexesInDatabaseQueue() throws ExecutionException,
                                                                     InterruptedException {
-        Future<Map<String, Object>> indexes = queue.submit(new SQLQueueCallable<Map<String,Object>>() {
+        Future<Map<String, Object>> indexes = queue.submit(new SQLCallable<Map<String,Object>>() {
             @Override
             public Map<String, Object> call(SQLDatabase database) {
                 return IndexManager.listIndexesInDatabase(database);

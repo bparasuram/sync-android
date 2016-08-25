@@ -14,6 +14,7 @@ package com.cloudant.sync.query;
 
 import com.cloudant.sync.datastore.Datastore;
 import com.cloudant.sync.sqlite.Cursor;
+import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.sqlite.SQLDatabaseQueue;
 import com.cloudant.sync.sqlite.SQLQueueCallable;
@@ -108,7 +109,7 @@ class QueryExecutor {
             return null;
         }
 
-        Future<List<String>> result = queue.submit(new SQLQueueCallable<List<String>>() {
+        Future<List<String>> result = queue.submit(new SQLCallable<List<String>>() {
             @Override
             public List<String> call(SQLDatabase database) throws Exception {
                 Set<String> docIdSet = executeQueryTree(root, database);

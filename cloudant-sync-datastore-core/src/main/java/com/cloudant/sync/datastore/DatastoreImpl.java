@@ -37,6 +37,7 @@ import com.cloudant.sync.notifications.DocumentDeleted;
 import com.cloudant.sync.notifications.DocumentModified;
 import com.cloudant.sync.notifications.DocumentUpdated;
 import com.cloudant.sync.sqlite.Cursor;
+import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.sqlite.SQLDatabaseQueue;
 import com.cloudant.sync.sqlite.SQLQueueCallable;
@@ -210,7 +211,7 @@ public class DatastoreImpl implements Datastore {
 
         try {
 
-            return queue.submit(new SQLQueueCallable<Long>() {
+            return queue.submit(new SQLCallable<Long>() {
                 @Override
                 public Long call(SQLDatabase db) throws Exception {
                     String sql = "SELECT MAX(sequence) FROM revs";
@@ -255,7 +256,7 @@ public class DatastoreImpl implements Datastore {
     public int getDocumentCount() {
         Preconditions.checkState(this.isOpen(), "Database is closed");
         try {
-            return queue.submit(new SQLQueueCallable<Integer>(){
+            return queue.submit(new SQLCallable<Integer>(){
                 @Override
                 public Integer call(SQLDatabase db) throws Exception {
                     String sql = "SELECT COUNT(DISTINCT doc_id) FROM revs WHERE current=1 AND deleted=0";
@@ -390,7 +391,7 @@ public class DatastoreImpl implements Datastore {
                 "be empty");
 
         try {
-            return queue.submit(new SQLQueueCallable<DocumentRevision>(){
+            return queue.submit(new SQLCallable<DocumentRevision>(){
                 @Override
                 public DocumentRevision call(SQLDatabase db) throws Exception {
                     return getDocumentInQueue(db, id, rev);
@@ -416,7 +417,7 @@ public class DatastoreImpl implements Datastore {
     public DocumentRevisionTree getAllRevisionsOfDocument(final String docId) {
 
         try {
-            return queue.submit(new SQLQueueCallable<DocumentRevisionTree>() {
+            return queue.submit(new SQLCallable<DocumentRevisionTree>() {
                 @Override
                 public DocumentRevisionTree call(SQLDatabase db) throws Exception {
 
@@ -469,7 +470,7 @@ public class DatastoreImpl implements Datastore {
         final long verifiedSince = since >= 0 ? since : 0;
 
         try {
-            return queue.submit(new SQLQueueCallable<Changes>() {
+            return queue.submit(new SQLCallable<Changes>() {
                 @Override
                 public Changes call(SQLDatabase db) throws Exception {
                     String[] args = {Long.toString(verifiedSince), Long.toString(verifiedSince + limit)};
@@ -524,7 +525,7 @@ public class DatastoreImpl implements Datastore {
         Preconditions.checkNotNull(docIds, "Input document internal id list cannot be null");
 
         try {
-            return queue.submit(new SQLQueueCallable<List<DocumentRevision>>() {
+            return queue.submit(new SQLCallable<List<DocumentRevision>>() {
                 @Override
                 public List<DocumentRevision> call(SQLDatabase db) throws Exception {
                     return getDocumentsWithInternalIdsInQueue(db, docIds);
@@ -595,7 +596,7 @@ public class DatastoreImpl implements Datastore {
             throw new IllegalArgumentException("limit must be >= 0");
         }
         try {
-            return queue.submit(new SQLQueueCallable<List<DocumentRevision>>(){
+            return queue.submit(new SQLCallable<List<DocumentRevision>>(){
                 @Override
                 public List<DocumentRevision> call(SQLDatabase db) throws Exception {
                     // Generate the SELECT statement, based on the options:
@@ -634,7 +635,7 @@ public class DatastoreImpl implements Datastore {
         Preconditions.checkState(this.isOpen(), "Database is closed");
         Preconditions.checkNotNull(docIds, "Input document id list cannot be null");
         try {
-            return queue.submit(new SQLQueueCallable<List<DocumentRevision>>(){
+            return queue.submit(new SQLCallable<List<DocumentRevision>>(){
                 @Override
                 public List<DocumentRevision> call(SQLDatabase db) throws Exception {
                     String sql = String.format("SELECT " + FULL_DOCUMENT_COLS + " FROM revs, docs" +
@@ -702,7 +703,7 @@ public class DatastoreImpl implements Datastore {
     public LocalDocument getLocalDocument(final String docId) throws DocumentNotFoundException {
         Preconditions.checkState(this.isOpen(), "Database is closed");
         try {
-            return queue.submit(new SQLQueueCallable<LocalDocument>(){
+            return queue.submit(new SQLCallable<LocalDocument>(){
                 @Override
                 public LocalDocument call(SQLDatabase db) throws Exception {
                     return doGetLocalDocument(db, docId);
@@ -801,7 +802,7 @@ public class DatastoreImpl implements Datastore {
         CouchUtils.validateDocumentId(docId);
         Preconditions.checkNotNull(body, "Input document body cannot be null");
         try {
-            return queue.submitTransaction(new SQLQueueCallable<LocalDocument>() {
+            return queue.submitTransaction(new SQLCallable<LocalDocument>() {
                 @Override
                 public LocalDocument call(SQLDatabase db) throws Exception {
                     ContentValues values = new ContentValues();
@@ -929,7 +930,7 @@ public class DatastoreImpl implements Datastore {
                 "Input document id cannot be empty");
 
         try {
-            queue.submit(new SQLQueueCallable<Object>() {
+            queue.submit(new SQLCallable<Object>() {
                 @Override
                 public Object call(SQLDatabase db) throws Exception {
                     String[] whereArgs = {docId};
@@ -1030,7 +1031,7 @@ public class DatastoreImpl implements Datastore {
     public String getPublicIdentifier() throws DatastoreException {
         Preconditions.checkState(this.isOpen(), "Database is closed");
         try {
-            return queue.submit(new SQLQueueCallable < String > () {
+            return queue.submit(new SQLCallable < String > () {
                 @Override
                 public String call(SQLDatabase db) throws Exception {
                     Cursor cursor = null;
@@ -1151,7 +1152,7 @@ public class DatastoreImpl implements Datastore {
         final List<DocumentModified> events = new LinkedList<DocumentModified>();
 
         try {
-            queue.submitTransaction(new SQLQueueCallable<Object>() {
+            queue.submitTransaction(new SQLCallable<Object>() {
                 @Override
                 public Object call(SQLDatabase db) throws Exception {
                     for (ForceInsertItem item : items) {
@@ -1473,7 +1474,7 @@ public class DatastoreImpl implements Datastore {
     @Override
     public void compact() {
         try {
-            queue.submit(new SQLQueueCallable<Object>() {
+            queue.submit(new SQLCallable<Object>() {
                 @Override
                 public Object call(SQLDatabase db) {
                     logger.finer("Deleting JSON of old revisions...");
@@ -1536,7 +1537,7 @@ public class DatastoreImpl implements Datastore {
         Preconditions.checkNotNull(revisions, "Input revisions must not be null");
 
         try {
-            return queue.submit(new SQLQueueCallable<Map<String,Collection<String>>>(){
+            return queue.submit(new SQLCallable<Map<String,Collection<String>>>(){
                 @Override
                 public Map<String, Collection<String>> call(SQLDatabase db) throws Exception {
                     Multimap<String, String> missingRevs = ArrayListMultimap.create();
@@ -1641,7 +1642,7 @@ public class DatastoreImpl implements Datastore {
                 "GROUP BY docs.docid HAVING COUNT(*) > 1";
 
         try {
-            return queue.submit(new SQLQueueCallable<Iterator<String>>() {
+            return queue.submit(new SQLCallable<Iterator<String>>() {
                 @Override
                 public Iterator<String> call(SQLDatabase db) throws Exception {
 
@@ -1679,7 +1680,7 @@ public class DatastoreImpl implements Datastore {
 
 
         try {
-            queue.submitTransaction(new SQLQueueCallable<Object>() {
+            queue.submitTransaction(new SQLCallable<Object>() {
                 @Override
                 public Object call(SQLDatabase db) throws Exception {
                     DocumentRevisionTree docTree = getAllRevisionsOfDocumentInQueue(db, docId);
@@ -1863,7 +1864,7 @@ public class DatastoreImpl implements Datastore {
      */
     public Attachment getAttachment(final String id, final String rev, final String attachmentName) {
         try {
-            return queue.submit(new SQLQueueCallable<Attachment>() {
+            return queue.submit(new SQLCallable<Attachment>() {
                 @Override
                 public Attachment call(SQLDatabase db) throws Exception {
                     long sequence = getSequenceInQueue(db, id, rev);
@@ -1892,7 +1893,7 @@ public class DatastoreImpl implements Datastore {
      */
     public List<? extends Attachment> attachmentsForRevision(final DocumentRevision rev) throws AttachmentException {
         try {
-            return queue.submit(new SQLQueueCallable<List<? extends Attachment>>(){
+            return queue.submit(new SQLCallable<List<? extends Attachment>>(){
 
                 @Override
                 public List<? extends Attachment> call(SQLDatabase db) throws Exception {
@@ -1945,7 +1946,7 @@ public class DatastoreImpl implements Datastore {
 
         DocumentRevision created = null;
         try {
-            created = queue.submitTransaction(new SQLQueueCallable<DocumentRevision>(){
+            created = queue.submitTransaction(new SQLCallable<DocumentRevision>(){
                 @Override
                 public DocumentRevision call(SQLDatabase db) throws Exception {
 
@@ -1995,7 +1996,7 @@ public class DatastoreImpl implements Datastore {
                 AttachmentManager.findExistingAttachments(attachments);
 
         try {
-            DocumentRevision revision = queue.submitTransaction(new SQLQueueCallable<DocumentRevision>(){
+            DocumentRevision revision = queue.submitTransaction(new SQLCallable<DocumentRevision>(){
                 @Override
                 public DocumentRevision call(SQLDatabase db) throws Exception {
                     return updateDocumentFromRevision(db,
@@ -2040,7 +2041,7 @@ public class DatastoreImpl implements Datastore {
         Preconditions.checkState(isOpen(),"Datastore is closed");
 
         try {
-            DocumentRevision deletedRevision = queue.submitTransaction(new SQLQueueCallable<DocumentRevision>() {
+            DocumentRevision deletedRevision = queue.submitTransaction(new SQLCallable<DocumentRevision>() {
                 @Override
                 public DocumentRevision call(SQLDatabase db) throws Exception {
                     return deleteDocumentInQueue(db, rev.getId(), rev.getRevision());
@@ -2075,7 +2076,7 @@ public class DatastoreImpl implements Datastore {
         // to return
 
         try {
-            return queue.submitTransaction(new SQLQueueCallable<List<DocumentRevision>>(){
+            return queue.submitTransaction(new SQLCallable<List<DocumentRevision>>(){
 
                 @Override
                 public List<DocumentRevision> call(SQLDatabase db) throws Exception {
@@ -2112,7 +2113,7 @@ public class DatastoreImpl implements Datastore {
         return null;
     }
 
-    <T> Future<T> runOnDbQueue(SQLQueueCallable<T> callable){
+    <T> Future<T> runOnDbQueue(SQLCallable<T> callable){
         return queue.submit(callable);
     }
 }
