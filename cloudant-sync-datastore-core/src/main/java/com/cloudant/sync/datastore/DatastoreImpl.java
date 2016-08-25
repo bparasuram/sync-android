@@ -1376,7 +1376,7 @@ public class DatastoreImpl implements Datastore {
         callable.available = true;
         long newLeafSeq = callable.call(db);
 
-        pickWinnerOfConflicts(db, docNumericID);
+        pickWinnerOfConflicts(docNumericID);
 
         // copy stubbed attachments forward from last real revision to this revision
         if (attachments != null) {
@@ -1423,16 +1423,13 @@ public class DatastoreImpl implements Datastore {
         callable.available = !newRevision.isDeleted();
         long newLeafSeq = callable.call(db);
 
-        pickWinnerOfConflicts(db, docNumericID);
+        pickWinnerOfConflicts(docNumericID);
         return newLeafSeq;
     }
 
-    private void pickWinnerOfConflicts(SQLDatabase db,
-                                       long docNumericId) throws DatastoreException {
+    private void pickWinnerOfConflicts(long docNumericId) throws DatastoreException {
         try {
-            new PickWinningRevisionCallable(docNumericId).call(db);
-        } catch (DatastoreException e) {
-            throw e;
+            queue.submit(new PickWinningRevisionCallable(docNumericId));
         } catch (Exception e) {
             throw new DatastoreException(e);
         }
@@ -1787,7 +1784,7 @@ public class DatastoreImpl implements Datastore {
      * @param sequence       Sequence number of revision
      * @param valueOfCurrent New value of {@code current} (true/false)
      *
-     * @see #pickWinnerOfConflicts(SQLDatabase, long)
+     * @see #pickWinnerOfConflicts(long)
      */
     private void setCurrent(SQLDatabase db, long sequence, boolean valueOfCurrent) {
         ContentValues updateContent = new ContentValues();
