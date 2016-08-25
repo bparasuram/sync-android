@@ -17,7 +17,6 @@ package com.cloudant.sync.datastore.callables;
 import com.cloudant.android.ContentValues;
 import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
-import com.cloudant.sync.sqlite.SQLQueueCallable;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;

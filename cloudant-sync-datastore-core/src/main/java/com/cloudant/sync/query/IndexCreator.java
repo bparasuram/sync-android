@@ -17,7 +17,6 @@ import com.cloudant.sync.datastore.Datastore;
 import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.sqlite.SQLDatabaseQueue;
-import com.cloudant.sync.sqlite.SQLQueueCallable;
 import com.google.common.base.Joiner;
 
 import org.apache.commons.codec.binary.Hex;
@@ -31,9 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;

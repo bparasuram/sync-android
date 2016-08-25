@@ -18,7 +18,6 @@ import com.cloudant.sync.datastore.DatastoreException;
 import com.cloudant.sync.sqlite.Cursor;
 import com.cloudant.sync.sqlite.SQLCallable;
 import com.cloudant.sync.sqlite.SQLDatabase;
-import com.cloudant.sync.sqlite.SQLQueueCallable;
 import com.cloudant.sync.util.DatabaseUtils;
 
 import java.sql.SQLException;
